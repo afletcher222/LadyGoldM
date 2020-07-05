@@ -363,7 +363,7 @@ void AMainCharacter::ShootAttack()
 	FVector LateralSpeed = FVector(Speed.X, Speed.Y, 0.0f);
 	float MovementSpeed = LateralSpeed.Size();
 
-	if (bMovingForward && MovementSpeed >= SpeedToAddOffset)
+	if (bMovingRight == true || bMovingForward && MovementSpeed >= SpeedToAddOffset)
 	{
 		AimAddition = FRotator(AimOffset, 0.0f, 0.0f);
 	}
@@ -387,7 +387,7 @@ void AMainCharacter::FlyingShootAttack()
 	FVector LateralSpeed = FVector(Speed.X, Speed.Y, 0.0f);
 	float MovementSpeed = LateralSpeed.Size();
 
-	if (bMovingForward && MovementSpeed >= SpeedToAddOffset)
+	if (bMovingRight == true || bMovingForward && MovementSpeed >= SpeedToAddOffset)
 	{
 		AimAddition = FRotator(FlyingAimOffset, 0.0f, 0.0f);
 	}
@@ -406,10 +406,6 @@ void AMainCharacter::FlyingShootAttack()
 void AMainCharacter::AttackEnd()
 {
 	bAttacking = false;
-	if (bLMBDown)
-	{
-		Attack();
-	}
 }
 
 void AMainCharacter::MeleeAttack()
@@ -418,6 +414,7 @@ void AMainCharacter::MeleeAttack()
 	{
 		bAttacking = true;
 		bAttackOnlyOnce = true;
+		bMeleeAttacking = true;
 
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (AnimInstance && CombatMontage)
@@ -439,6 +436,7 @@ void AMainCharacter::MeleeAttack()
 void AMainCharacter::MeleeAttackEnd()
 {
 	bAttacking = false;
+	bMeleeAttacking = false;
 }
 
 float AMainCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const & DamageEvent, class AController * EventInstigator, AActor * DamageCauser)

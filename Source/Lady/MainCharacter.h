@@ -63,6 +63,9 @@ public:
 	bool bAttacking;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Anims")
+	bool bMeleeAttacking;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Anims")
 	bool bAttackOnlyOnce;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
