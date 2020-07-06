@@ -228,6 +228,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Destructable")
 	FVector FirstWaterDropLocation;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Anims")
+	bool bIsOnFirstLevel;
+
 
 protected:
 	// Called when the game starts or when spawned

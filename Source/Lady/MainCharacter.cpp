@@ -108,6 +108,8 @@ AMainCharacter::AMainCharacter()
 	bSpiderWebDestroyed = false;
 	bFirstWaterPickup = false;
 
+	bIsOnFirstLevel = true;
+
 }
 
 // Called when the game starts or when spawned
@@ -137,6 +139,8 @@ void AMainCharacter::BeginPlay()
 
 	LoadGameInstance = Cast<USaveGameAtCheckPoint>(UGameplayStatics::LoadGameFromSlot(LoadGameInstance->PlayerName, LoadGameInstance->UserIndex));
 
+	bIsOnFirstLevel = true;
+
 	if (LoadGameInstance)
 	{
 		bLoadToCheckpoint = LoadGameInstance->CharacterStats.bLoadToCheckPoint;
@@ -158,8 +162,8 @@ void AMainCharacter::BeginPlay()
 			SetActorLocation(LoadGameInstance->CharacterStats.Location);
 			SetActorRotation(LoadGameInstance->CharacterStats.Rotation);
 			MainPlayerController->SetControlRotation(GetActorRotation());
+			bIsOnFirstLevel = false;
 		}
-
 	}
 	SetMovementStatus(EMovementStatus::EMS_Normal);
 }
