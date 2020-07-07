@@ -95,6 +95,7 @@ void ALevelTeleporter::Teleport(AMainCharacter* Main)
 	Main->DisableInput(PlayerController);
 	Main->ChapterCounter++;
 	Main->Health = 9;
+	Main->Water = 0;
 	if (!bMovingToSecondLevel)
 	{
 		bJustTeleported = true;
