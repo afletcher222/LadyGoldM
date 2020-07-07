@@ -104,6 +104,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 	TArray<AActor*> FoundBossAdds;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+		TSubclassOf<class AMainCharacter> IsTarget;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+		TArray<AActor*> FoundPlayer;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

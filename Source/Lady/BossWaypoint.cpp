@@ -72,6 +72,9 @@ void ABossWaypoint::BeginPlay()
 	IsBoss = ABoss::StaticClass();
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), IsBoss, FoundBoss);
 
+	IsTarget = AMainCharacter::StaticClass();
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), IsTarget, FoundPlayer);
+
 	bNoNextPlatform = false;
 	
 }
@@ -81,15 +84,26 @@ void ABossWaypoint::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	ABoss* Boss = Cast<ABoss>(FoundBoss[0]);
+	AMainCharacter* Main = Cast<AMainCharacter>(FoundPlayer[0]);
+
 	if (bNoNextPlatform == true && Boss->bAttacking == false)
 	{
-		for (int i = 0; i < Platforms.Num(); i++)
+		if (bCurrentPalyerPlatform)
 		{
-			if (Platforms[i]->bPlayerOnPlatform == true)
+			Boss->MoveToTarget(Main);
+			Boss->bCanDamagePlayerWithJump = false;
+		}
+		else
+		{
+			for (int i = 0; i < Platforms.Num(); i++)
 			{
-				Boss->MoveToTarget(Platforms[i]);
-				bNoNextPlatform = false;
-				return;
+				if (Platforms[i]->bPlayerOnPlatform == true)
+				{
+					Boss->MoveToTarget(Platforms[i]);
+					bNoNextPlatform = false;
+					Boss->bCanDamagePlayerWithJump = true;
+					return;
+				}
 			}
 		}
 	}
