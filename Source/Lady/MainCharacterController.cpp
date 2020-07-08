@@ -221,3 +221,8 @@ void AMainCharacterController::DisplayEndLevelScreen_Implementation(ALevelTelepo
 {
 
 }
+
+void AMainCharacterController::RemoveBossEnclosure_Implementation()
+{
+
+}

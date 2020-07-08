@@ -112,4 +112,7 @@ public:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
 	void DisplayEndLevelScreen(ALevelTeleporter* Teleporter);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category = "HUD")
+	void RemoveBossEnclosure();
 };

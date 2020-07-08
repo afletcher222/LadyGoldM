@@ -19,6 +19,7 @@
 #include "BossWaypoint.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
+#include "MainCharacterController.h"
 
 // Sets default values
 ABoss::ABoss()
@@ -194,6 +195,7 @@ float ABoss::TakeDamage(float DamageAmount, struct FDamageEvent const & DamageEv
 			AMainCharacter* Main = Cast<AMainCharacter>(FoundPlayer[0]);
 			if (Main)
 			{
+				Main->MainPlayerController->RemoveBossEnclosure();
 				Main->ScoreForTheCurrentLevel += Main->ScoreAmountPerBoss;
 				Main->TallyLevelScore();
 			}
@@ -281,6 +283,14 @@ void ABoss::OnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* Oth
 		AMainCharacter* Main = Cast<AMainCharacter>(OtherActor);
 		if (Main)
 		{
+			if (Main->HitParticles)
+			{
+				UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), Main->HitParticles, Main->GetActorLocation(), FRotator(0.0f), false);
+			}
+			if (Main->HitSound)
+			{
+				UGameplayStatics::PlaySound2D(this, Main->HitSound);
+			}
 			bCanDamagePlayerWithJump = false;
 			UGameplayStatics::ApplyDamage(Main, Damage, EnemyWeaponInstigator, this, DamageTypeClass);
 			GetWorldTimerManager().SetTimer(JumpDamageTimer, this, &ABoss::BossCanDamage, JumpDamageTime);
