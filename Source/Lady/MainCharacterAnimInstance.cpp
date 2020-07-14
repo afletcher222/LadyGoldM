@@ -37,6 +37,7 @@ void UMainCharacterAnimInstance::UpdateAnimationProperties()
 		{
 			DoubleJump = Main->DoubleJumpCounter;
 			bIsAttacking = Main->bAttacking;
+			bTurn = Main->TurningSpeed;
 		}
 
 

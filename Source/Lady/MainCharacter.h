@@ -49,6 +49,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Running")
 	float RunningSpeed;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Running")
+	float TurningSpeed;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Anims")
 	bool bMovingForward;
 	bool bMovingRight;

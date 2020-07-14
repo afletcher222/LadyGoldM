@@ -28,6 +28,9 @@ public:
 	bool bIsInAir;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)
+	float bTurn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)
 	int DoubleJump;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Movement)

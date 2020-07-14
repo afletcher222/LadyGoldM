@@ -203,6 +203,8 @@ void AMainCharacter::SetMovementStatus(EMovementStatus Status)
 void AMainCharacter::MoveForward(float Value)
 {
 	bMovingForward = false;
+	bUseControllerRotationYaw = false;
+	TurningSpeed = 0;
 	if (CanMove(Value))
 	{
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -216,6 +218,8 @@ void AMainCharacter::MoveForward(float Value)
 void AMainCharacter::MoveRight(float Value)
 {
 	bMovingRight = false;
+	bUseControllerRotationYaw = false;
+	TurningSpeed = 0;
 	if (CanMove(Value))
 	{
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -260,6 +264,11 @@ void AMainCharacter::Turn(float Value)
 	if (CanMove(Value))
 	{
 		AddControllerYawInput(Value);
+		if (!bMovingForward && !bMovingRight)
+		{
+			bUseControllerRotationYaw = true;
+			TurningSpeed = Value;
+		}
 	}
 }
 void AMainCharacter::lookUp(float Value)
