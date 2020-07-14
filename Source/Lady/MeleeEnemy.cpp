@@ -80,7 +80,6 @@ AMeleeEnemy::AMeleeEnemy()
 	bAttackOnlyOnce = false;
 
 	ChaseTime = 2.0f;
-	AttackSphereTime = 2.0f;
 }
 
 // Called when the game starts or when spawned
@@ -137,6 +136,11 @@ void AMeleeEnemy::BeginPlay()
 void AMeleeEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (EPathFollowingResult::Blocked || EPathFollowingResult::Invalid || EPathFollowingResult::Aborted)
+	{
+		bPlayerOutOfReach = true;
+	}
 
 	if (bInterpToTarget && CombatTarget && Alive())
 	{
@@ -199,15 +203,12 @@ void AMeleeEnemy::AgroSphereOnOverlapEnd(UPrimitiveComponent* OverlappedComponen
 
 void AMeleeEnemy::CombatSphereOnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIdex, bool bFromSweep, const FHitResult &SweepResult)
 {
-	if (OtherActor && Alive() && !bHasCalledAttack)
+	if (OtherActor && Alive())
 	{
 		AMainCharacter* Main = Cast<AMainCharacter>(OtherActor);
 		AWaypoint* Waypoint = Cast<AWaypoint>(OtherActor);
 		if (Main)
 		{
-			bHasCalledAttack = true;
-			GetWorldTimerManager().SetTimer(AttackSphereTimer, this, &AMeleeEnemy::ResetAgroCheck, AttackSphereTime);
-
 			if (bPlayerOutOfReach == true)
 			{
 				bPlayerOutOfReach = false;
