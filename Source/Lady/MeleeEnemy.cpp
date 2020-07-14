@@ -143,6 +143,11 @@ void AMeleeEnemy::Tick(float DeltaTime)
 		FRotator InterpLocation = FMath::RInterpTo(GetActorRotation(), OffsetYaw, DeltaTime, InterpSpeed);
 		SetActorRotation(InterpLocation);
 	}
+
+	if (bPlayerOutOfReach == true)
+	{
+		MoveToTarget(FoundPlayer[0]);
+	}
 }
 
 // Called to bind functionality to input
@@ -161,7 +166,11 @@ void AMeleeEnemy::AgroSphereOnOverlapBegin(UPrimitiveComponent* OverlappedCompon
 		{
 			GetWorldTimerManager().ClearTimer(WaypointTimer);
 			MoveToTarget(Main);
-			
+			bPlayerOutOfReach = false;
+			if (EPathFollowingResult::Blocked || EPathFollowingResult::Invalid || EPathFollowingResult::Aborted)
+			{
+				bPlayerOutOfReach = true;
+			}
 			bPatrol = false;
 			bOverlappingAgroSphere = true;
 		}
@@ -171,6 +180,7 @@ void AMeleeEnemy::AgroSphereOnOverlapBegin(UPrimitiveComponent* OverlappedCompon
 void AMeleeEnemy::AgroSphereOnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIdex)
 {
 	bOverlappingAgroSphere = false;
+	bPlayerOutOfReach = false;
 }
 
 void AMeleeEnemy::CombatSphereOnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIdex, bool bFromSweep, const FHitResult &SweepResult)
@@ -181,7 +191,11 @@ void AMeleeEnemy::CombatSphereOnOverlapBegin(UPrimitiveComponent* OverlappedComp
 		AWaypoint* Waypoint = Cast<AWaypoint>(OtherActor);
 		if (Main)
 		{
-			if (!bIsRanged && !bAttackHasBeenCalled)
+			if (bPlayerOutOfReach == true)
+			{
+				bPlayerOutOfReach = false;
+			}
+			if (!bIsRanged && !bAttackHasBeenCalled && !bAttackingFromAttackEnd)
 			{
 				AIController->StopMovement();
 				SetEnemyMovementStatus(EEnemyMovementStatus::EMS_Attaking);
@@ -196,7 +210,7 @@ void AMeleeEnemy::CombatSphereOnOverlapBegin(UPrimitiveComponent* OverlappedComp
 					GetWorldTimerManager().SetTimer(AttackTimer, this, &AMeleeEnemy::Attack, AttackTime);
 				}
 			}
-			else if (bIsRanged && !bAttackHasBeenCalled)
+			else if (bIsRanged && !bAttackHasBeenCalled && !bAttackingFromAttackEnd)
 			{
 				if (AIController)
 				{
@@ -213,7 +227,7 @@ void AMeleeEnemy::CombatSphereOnOverlapBegin(UPrimitiveComponent* OverlappedComp
 			else
 			{
 				bOverlappingCombatSphere = true;
-				bHasValidTarget = false;
+				//bHasValidTarget = false;
 			}
 		}
 	}
@@ -255,6 +269,7 @@ void AMeleeEnemy::ChaseSphereOnOverlapEnd(UPrimitiveComponent* OverlappedCompone
 						MoveToTarget(Waypoints[0]);
 						bPatrol = true;
 						bHasValidTarget = false;
+						bOverlappingAgroSphere = false;
 					}
 
 			}
@@ -301,6 +316,20 @@ void AMeleeEnemy::MoveToTarget(class AActor* Target)
 	SetEnemyMovementStatus(EEnemyMovementStatus::EMS_MoveToTarget);
 	if (AIController)
 	{
+		if (bOverlappingCombatSphere)
+		{
+			if (bIsRanged)
+			{
+				float AttackTime = FMath::FRandRange(AttackMinTime, AttackMaxTime);
+				GetWorldTimerManager().SetTimer(AttackTimer, this, &AMeleeEnemy::RangedAttack, AttackTime);
+				UE_LOG(LogTemp, Warning, TEXT("Attacked From MoveToTarget"));
+			}
+			else if (!bIsRanged)
+			{
+				float AttackTime = FMath::FRandRange(AttackMinTime, AttackMaxTime);
+				GetWorldTimerManager().SetTimer(AttackTimer, this, &AMeleeEnemy::Attack, AttackTime);
+			}
+		}
 
 		FAIMoveRequest MoveRequest;
 		MoveRequest.SetGoalActor(Target);
@@ -383,6 +412,7 @@ void AMeleeEnemy::Attack()
 			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 			if (AnimInstance)
 			{
+				bAttackingFromAttackEnd = false;
 				bAttacking = true;
 				bAttackOnlyOnce = true;
 				AnimInstance->Montage_Play(CombatMontage, 1.35f);
@@ -404,14 +434,17 @@ void AMeleeEnemy::AttackEnd()
 				bAttacking = false;
 				bAttackHasBeenCalled = false;
 				SetInterpToTarget(true);
+				bAttackingFromAttackEnd = true;
 				GetWorldTimerManager().ClearTimer(AttackTimer);
 				float AttackTime = FMath::FRandRange(AttackMinTime, AttackMaxTime);
 				GetWorldTimerManager().SetTimer(AttackTimer, this, &AMeleeEnemy::Attack, AttackTime);
+				UE_LOG(LogTemp, Warning, TEXT("Was still overlapping"));
 			}
 			else if (bIsRanged && bOverlappingAgroSphere)
 			{
 				bAttacking = false;
 				bAttackHasBeenCalled = false;
+				bAttackingFromAttackEnd = true;
 				GetWorldTimerManager().ClearTimer(AttackTimer);
 				float AttackTime = FMath::FRandRange(AttackMinTime, AttackMaxTime);
 				GetWorldTimerManager().SetTimer(AttackTimer, this, &AMeleeEnemy::RangedAttack, AttackTime);
@@ -425,8 +458,9 @@ void AMeleeEnemy::AttackEnd()
 				{
 					SetEnemyMovementStatus(EEnemyMovementStatus::EMS_MoveToTarget);
 					MoveToTarget(FoundPlayer[0]);
-					CombatTarget = nullptr;
+					//CombatTarget = nullptr;
 				}
+				UE_LOG(LogTemp, Warning, TEXT("Not Overlapping"));
 			}
 			else if (bIsRanged && !bOverlappingCombatSphere && bHasValidTarget)
 			{
@@ -437,13 +471,14 @@ void AMeleeEnemy::AttackEnd()
 				{
 					SetEnemyMovementStatus(EEnemyMovementStatus::EMS_MoveToTarget);
 					MoveToTarget(FoundPlayer[0]);
-					CombatTarget = nullptr;
+					//CombatTarget = nullptr;
 				}
 			}
 			else
 			{
 				bAttacking = false;
 				bAttackHasBeenCalled = false;
+				bAttackingFromAttackEnd = true;
 				GetWorldTimerManager().ClearTimer(AttackTimer);
 				float AttackTime = FMath::FRandRange(AttackMinTime, AttackMaxTime);
 				if (bIsRanged)
@@ -454,7 +489,9 @@ void AMeleeEnemy::AttackEnd()
 				{
 					GetWorldTimerManager().SetTimer(AttackTimer, this, &AMeleeEnemy::Attack, AttackTime);
 				}
+				UE_LOG(LogTemp, Warning, TEXT("went to else statement"));
 			}
+			//UE_LOG(LogTemp, Warning, TEXT("somehow went here"));
 		}
 		else
 		{
