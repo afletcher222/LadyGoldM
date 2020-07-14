@@ -176,6 +176,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
 		float ChaseTime;
 
+	FTimerHandle AttackSphereTimer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+		float AttackSphereTime;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

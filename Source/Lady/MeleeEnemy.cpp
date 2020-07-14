@@ -79,8 +79,8 @@ AMeleeEnemy::AMeleeEnemy()
 	bIsInvincible = false;
 	bAttackOnlyOnce = false;
 
-	ChaseTime = 3.0f;
-
+	ChaseTime = 2.0f;
+	AttackSphereTime = 2.0f;
 }
 
 // Called when the game starts or when spawned
@@ -199,12 +199,15 @@ void AMeleeEnemy::AgroSphereOnOverlapEnd(UPrimitiveComponent* OverlappedComponen
 
 void AMeleeEnemy::CombatSphereOnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIdex, bool bFromSweep, const FHitResult &SweepResult)
 {
-	if (OtherActor && Alive())
+	if (OtherActor && Alive() && !bHasCalledAttack)
 	{
 		AMainCharacter* Main = Cast<AMainCharacter>(OtherActor);
 		AWaypoint* Waypoint = Cast<AWaypoint>(OtherActor);
 		if (Main)
 		{
+			bHasCalledAttack = true;
+			GetWorldTimerManager().SetTimer(AttackSphereTimer, this, &AMeleeEnemy::ResetAgroCheck, AttackSphereTime);
+
 			if (bPlayerOutOfReach == true)
 			{
 				bPlayerOutOfReach = false;
@@ -711,5 +714,5 @@ void AMeleeEnemy::ResetChaseCheck()
 
 void AMeleeEnemy::ResetAgroCheck()
 {
-
+	bHasCalledAttack = false;
 }
