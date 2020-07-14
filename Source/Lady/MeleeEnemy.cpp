@@ -183,7 +183,7 @@ void AMeleeEnemy::AgroSphereOnOverlapBegin(UPrimitiveComponent* OverlappedCompon
 
 void AMeleeEnemy::AgroSphereOnOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIdex)
 {
-	if (OtherActor && Alive())
+	if (OtherActor && Alive() && !bHasCalledMoveToTarget)
 	{
 		AMainCharacter* Main = Cast<AMainCharacter>(OtherActor);
 		if (Main)
