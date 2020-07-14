@@ -137,11 +137,6 @@ void AMeleeEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (EPathFollowingResult::Blocked || EPathFollowingResult::Invalid || EPathFollowingResult::Aborted)
-	{
-		bPlayerOutOfReach = true;
-	}
-
 	if (bInterpToTarget && CombatTarget && Alive())
 	{
 		FRotator LookAtYaw = GetLookAtRotationYaw(CombatTarget->GetActorLocation());
