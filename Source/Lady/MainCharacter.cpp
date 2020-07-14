@@ -690,6 +690,7 @@ void AMainCharacter::CombatOnOverlapBegin(UPrimitiveComponent* OverlappedCompone
 						if (DamageTypeClass)
 						{
 							UGameplayStatics::ApplyDamage(Enemy, Damage, WeaponInstigator, this, DamageTypeClass);
+							Enemy->WasAttacked();
 						}
 					}
 					bAttackOnlyOnce = false;
