@@ -167,6 +167,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Crystals")
 	bool bIsInvincible;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Crystals")
+	bool bHasCalledMoveToTarget;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Crystals")
+	bool bHasCalledAttack;
+
+	FTimerHandle ChaseTimer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI")
+		float ChaseTime;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -253,5 +262,8 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Pickup")
 	void HitThePlayer(AMainCharacter* Main);
+
+	void ResetChaseCheck();
+	void ResetAgroCheck();
 
 };

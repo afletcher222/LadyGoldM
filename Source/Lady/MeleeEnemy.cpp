@@ -79,6 +79,8 @@ AMeleeEnemy::AMeleeEnemy()
 	bIsInvincible = false;
 	bAttackOnlyOnce = false;
 
+	ChaseTime = 3.0f;
+
 }
 
 // Called when the game starts or when spawned
@@ -159,11 +161,13 @@ void AMeleeEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 
 void AMeleeEnemy::AgroSphereOnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIdex, bool bFromSweep, const FHitResult &SweepResult)
 {
-	if (OtherActor && Alive())
+	if (OtherActor && Alive() && !bHasCalledMoveToTarget)
 	{
 		AMainCharacter* Main = Cast<AMainCharacter>(OtherActor);
 		if (Main)
 		{
+			bHasCalledMoveToTarget = true;
+			GetWorldTimerManager().SetTimer(ChaseTimer, this, &AMeleeEnemy::ResetChaseCheck, ChaseTime);
 			GetWorldTimerManager().ClearTimer(WaypointTimer);
 			MoveToTarget(Main);
 			bPlayerOutOfReach = false;
@@ -342,6 +346,14 @@ void AMeleeEnemy::MoveToTarget(class AActor* Target)
 			{
 				float AttackTime = FMath::FRandRange(AttackMinTime, AttackMaxTime);
 				GetWorldTimerManager().SetTimer(AttackTimer, this, &AMeleeEnemy::Attack, AttackTime);
+			}
+		}
+		if (bOverlappingAgroSphere)
+		{
+			if (bIsRanged)
+			{
+				float AttackTime = FMath::FRandRange(AttackMinTime, AttackMaxTime);
+				GetWorldTimerManager().SetTimer(AttackTimer, this, &AMeleeEnemy::RangedAttack, AttackTime);
 			}
 		}
 
@@ -601,6 +613,12 @@ void AMeleeEnemy::RangedAttack()
 	{
 		if (!bAttacking)
 		{
+			if (AIController)
+			{
+				AIController->StopMovement();
+				SetEnemyMovementStatus(EEnemyMovementStatus::EMS_Attaking);
+			}
+
 			bAttacking = true;
 			bAttackHasBeenCalled = true;
 			SetInterpToTarget(true);
@@ -684,4 +702,14 @@ void AMeleeEnemy::WasAttacked()
 			bHasValidTarget = true;
 		}
 	}
+}
+
+void AMeleeEnemy::ResetChaseCheck()
+{
+	bHasCalledMoveToTarget = false;
+}
+
+void AMeleeEnemy::ResetAgroCheck()
+{
+
 }
